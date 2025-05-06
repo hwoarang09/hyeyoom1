@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { sampleServices, sampleServiceCategories } from "@/data/sampleData";
 
 // 서비스 타입 정의
 interface Service {
@@ -20,79 +21,6 @@ interface Category {
 interface ServicesListProps {
   serviceCount: number;
 }
-
-// 샘플 카테고리 데이터
-const categories: Category[] = [
-  { id: "featured", name: "Featured" },
-  { id: "man-cut", name: "Man-cut" },
-  { id: "man-perm", name: "Man-Perm" },
-  { id: "girl-cut", name: "Girl-cut" },
-  { id: "girl-perm", name: "Girl-Perm" },
-  { id: "color", name: "Hair Colour | Tint" },
-  { id: "cleanse", name: "Cleanse & Style" },
-];
-
-// 샘플 서비스 데이터
-const services: Service[] = [
-  {
-    id: "1",
-    name: "Cleanse & Style",
-    duration: "45 mins",
-    price: "SGD 56",
-    category: "cleanse",
-  },
-  {
-    id: "2",
-    name: "AROMATHÉRAPIE Pedicure",
-    duration: "1 hr",
-    price: "SGD 52",
-    category: "featured",
-    femaleOnly: true,
-  },
-  {
-    id: "3",
-    name: "Men's Haircut",
-    duration: "30 mins",
-    price: "SGD 45",
-    category: "man-cut",
-  },
-  {
-    id: "4",
-    name: "Men's Perm",
-    duration: "2 hrs",
-    price: "SGD 120",
-    category: "man-perm",
-  },
-  {
-    id: "5",
-    name: "Women's Haircut",
-    duration: "45 mins",
-    price: "SGD 65",
-    category: "girl-cut",
-  },
-  {
-    id: "6",
-    name: "Women's Perm",
-    duration: "3 hrs",
-    price: "SGD 180",
-    category: "girl-perm",
-  },
-  {
-    id: "7",
-    name: "Hair Coloring - Full",
-    duration: "2 hrs",
-    price: "SGD 150",
-    category: "color",
-  },
-  {
-    id: "8",
-    name: "All-in-One Hair Package",
-    duration: "4 hrs",
-    price: "SGD 250",
-    category: "featured",
-    description: "Includes cut, color, and styling",
-  },
-];
 
 const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
   // 선택된 카테고리 상태
@@ -140,7 +68,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
   }, []);
 
   // 선택된 카테고리에 해당하는 서비스 필터링
-  const filteredServices = services.filter(
+  const filteredServices = sampleServices.filter(
     (service) => service.category === selectedCategory
   );
 
@@ -154,7 +82,7 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
           className="flex overflow-x-auto scrollbar-hide gap-3 py-2 px-1"
           ref={categoriesRef}
         >
-          {categories.map((category) => (
+          {sampleServiceCategories.map((category) => (
             <button
               key={category.id}
               data-category={category.id}

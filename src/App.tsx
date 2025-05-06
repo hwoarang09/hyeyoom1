@@ -1,15 +1,23 @@
 import Navbar from "./components/layout/Navbar";
-import ImageSlider from "./components/salon/ImageSlider";
+import ImageSlider from "./components/photos/ImageSlider";
 import SalonInfo from "./components/salon/SalonInfo";
-import ServicesList from "./components/salon/ServicesList";
+import ServicesList from "./components/services/ServicesList";
+import ShortsSection from "./components/shorts/ShortsSection";
+import TeamSection from "./components/team/TeamSection";
+import ReviewsSection from "./components/reviews/ReviewsSection";
+import BuySection from "./components/buy/BuySection";
+import AboutSection from "./components/about/AboutSection";
 import BookingBar from "./components/layout/BookingBar";
 
-// 샘플 이미지 URL (실제 구현 시 적절한 이미지로 교체 필요)
-const sampleImages = [
-  "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
-  "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1036&q=80",
-  "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
-];
+// 샘플 데이터 가져오기
+import {
+  sampleImages,
+  sampleShorts,
+  sampleTeam,
+  sampleReviews,
+  sampleBuyOptions,
+  sampleAbout,
+} from "./data/sampleData";
 
 function App() {
   return (
@@ -17,8 +25,10 @@ function App() {
       <Navbar />
 
       <main className="container mx-auto max-w-7xl pb-16">
+        {/* Photos (이미지 슬라이더) */}
         <ImageSlider images={sampleImages} />
 
+        {/* 살롱 정보 */}
         <SalonInfo
           name="Trimmings Salon & Spa | Dempsey Hill"
           location="Tanglin, Singapore"
@@ -28,9 +38,27 @@ function App() {
           openingTime="Friday at 9:00 AM"
         />
 
+        {/* Shorts 섹션 */}
+        <ShortsSection shorts={sampleShorts} />
+
+        {/* Services 섹션 */}
         <ServicesList serviceCount={241} />
 
-        {/* 여기에 추가 섹션들을 넣을 수 있습니다 */}
+        {/* Team 섹션 */}
+        <TeamSection members={sampleTeam} />
+
+        {/* Reviews 섹션 */}
+        <ReviewsSection
+          reviews={sampleReviews}
+          averageRating={4.9}
+          totalReviews={2458}
+        />
+
+        {/* Buy 섹션 */}
+        <BuySection options={sampleBuyOptions} />
+
+        {/* About 섹션 */}
+        <AboutSection description={sampleAbout} />
 
         {/* 하단 여백 추가 */}
         <div className="h-10"></div>
