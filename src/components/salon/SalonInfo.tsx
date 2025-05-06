@@ -1,66 +1,104 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import LocationReelsModal from "@/components/location/LocationReelsModal";
+import PromotionModal from "@/components/promotion/PromotionModal";
+import { locationReels, promotionData } from "@/data/sampleData";
+import { useUIStore } from "@/store/uiStore";
 
 interface SalonInfoProps {
   name: string;
   location: string;
-  rating: number;
-  reviewCount: number;
-  status: 'open' | 'closed';
+  status: "open" | "closed";
   openingTime?: string;
+  slogan?: string;
+  subtitle?: string;
 }
 
 const SalonInfo: React.FC<SalonInfoProps> = ({
   name,
   location,
-  rating,
-  reviewCount,
   status,
-  openingTime
+  openingTime,
+  slogan,
+  subtitle,
 }) => {
+  // 모달 상태
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
+
+  // Zustand 스토어에서 모달 상태 설정 함수 가져오기
+  const setModalOpen = useUIStore((state) => state.setModalOpen);
+
+  // Location 모달 상태가 변경될 때 Zustand 스토어 업데이트
+  const handleLocationModalToggle = (isOpen: boolean) => {
+    setIsLocationModalOpen(isOpen);
+    setModalOpen(isOpen);
+  };
+
+  // Promotion 모달 상태가 변경될 때 Zustand 스토어 업데이트
+  const handlePromotionModalToggle = (isOpen: boolean) => {
+    setIsPromotionModalOpen(isOpen);
+    setModalOpen(isOpen);
+  };
   return (
     <div className="px-4 py-5">
-      <h1 className="text-2xl font-bold mb-2">{name}</h1>
-      
-      <div className="flex items-center mb-2">
-        <div className="flex items-center">
-          <span className="text-lg font-semibold mr-1">{rating.toFixed(1)}</span>
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <svg 
-                key={i} 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="currentColor" 
-                className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-500' : 'text-gray-300'}`}
-              >
-                <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clipRule="evenodd" />
-              </svg>
-            ))}
-          </div>
-        </div>
-        <span className="text-gray-500 ml-2">({reviewCount.toLocaleString()})</span>
-      </div>
-      
+      <h1 className="text-2xl font-bold mb-1">{name}</h1>
+
+      {subtitle && <p className="text-gray-700 font-medium mb-1">{subtitle}</p>}
+      {slogan && <p className="text-gray-600 italic mb-2">{slogan}</p>}
+
       <p className="text-gray-600 mb-2">{location}</p>
-      
+
       <div className="mb-4">
-        <span className={`font-medium ${status === 'open' ? 'text-green-600' : 'text-red-600'}`}>
-          {status === 'open' ? 'Open' : 'Closed'}
+        <span
+          className={`font-medium ${
+            status === "open" ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {status === "open" ? "Open" : "Closed"}
         </span>
-        {status === 'closed' && openingTime && (
+        {status === "closed" && openingTime && (
           <span className="text-gray-600"> - opens on {openingTime}</span>
         )}
       </div>
-      
+
       <div className="flex gap-2">
-        <Button variant="outline" className="rounded-full px-4 py-1 h-auto text-sm">
-          Featured
+        <Button
+          variant="outline"
+          className="rounded-full px-4 py-1 h-auto text-sm text-pink-600 border-pink-200 bg-pink-50"
+          onClick={() => handlePromotionModalToggle(true)}
+        >
+          Promotion
         </Button>
-        <Button variant="outline" className="rounded-full px-4 py-1 h-auto text-sm text-green-600 border-green-200 bg-green-50">
-          Deals
+        <Button
+          variant="outline"
+          className="rounded-full px-4 py-1 h-auto text-sm text-blue-600 border-blue-200 bg-blue-50"
+          onClick={() => handleLocationModalToggle(true)}
+        >
+          Location
+        </Button>
+        <Button
+          variant="outline"
+          className="rounded-full px-4 py-1 h-auto text-sm text-green-600 border-green-200 bg-green-50"
+        >
+          Recruit
         </Button>
       </div>
+
+      {/* Location 릴스 모달 */}
+      <LocationReelsModal
+        isOpen={isLocationModalOpen}
+        onClose={() => handleLocationModalToggle(false)}
+        reels={locationReels}
+      />
+
+      {/* Promotion 모달 */}
+      <PromotionModal
+        isOpen={isPromotionModalOpen}
+        onClose={() => handlePromotionModalToggle(false)}
+        slides={promotionData.slides}
+        commonMessage={promotionData.commonMessage}
+      />
     </div>
   );
 };

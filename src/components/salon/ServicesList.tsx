@@ -110,13 +110,16 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
       );
 
       if (selectedButton) {
+        // HTMLElement로 타입 캐스팅
+        const buttonElement = selectedButton as HTMLElement;
+
         // 버튼의 위치와 컨테이너의 중앙 위치 계산
-        const buttonRect = selectedButton.getBoundingClientRect();
+        const buttonRect = buttonElement.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
 
         // 버튼을 중앙에 위치시키기 위한 스크롤 위치 계산
         const scrollLeft =
-          selectedButton.offsetLeft -
+          buttonElement.offsetLeft -
           containerRect.width / 2 +
           buttonRect.width / 2;
 

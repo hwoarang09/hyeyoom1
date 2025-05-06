@@ -68,7 +68,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
 
   return (
     <div
-      className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden"
+      className="relative w-full h-80 sm:h-[24rem] md:h-[28rem] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

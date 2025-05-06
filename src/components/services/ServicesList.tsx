@@ -1,22 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { sampleServices, sampleServiceCategories } from "@/data/sampleData";
-
-// 서비스 타입 정의
-interface Service {
-  id: string;
-  name: string;
-  duration: string;
-  price: string;
-  category: string;
-  description?: string;
-  femaleOnly?: boolean;
-}
-
-// 카테고리 타입 정의
-interface Category {
-  id: string;
-  name: string;
-}
+import Modal from "@/components/ui/Modal";
+import { useUIStore } from "@/store/uiStore";
 
 interface ServicesListProps {
   serviceCount: number;
@@ -25,6 +10,18 @@ interface ServicesListProps {
 const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
   // 선택된 카테고리 상태
   const [selectedCategory, setSelectedCategory] = useState<string>("featured");
+
+  // 모달 상태 관리
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Zustand 스토어에서 모달 상태 설정 함수 가져오기
+  const setModalOpen = useUIStore((state) => state.setModalOpen);
+
+  // 모달 상태 변경 핸들러
+  const handleModalToggle = (isOpen: boolean) => {
+    setIsModalOpen(isOpen);
+    setModalOpen(isOpen);
+  };
 
   // 카테고리 스크롤을 위한 ref
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -38,13 +35,16 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
       );
 
       if (selectedButton) {
+        // HTMLElement로 타입 캐스팅
+        const buttonElement = selectedButton as HTMLElement;
+
         // 버튼의 위치와 컨테이너의 중앙 위치 계산
-        const buttonRect = selectedButton.getBoundingClientRect();
+        const buttonRect = buttonElement.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
 
         // 버튼을 중앙에 위치시키기 위한 스크롤 위치 계산
         const scrollLeft =
-          selectedButton.offsetLeft -
+          buttonElement.offsetLeft -
           containerRect.width / 2 +
           buttonRect.width / 2;
 
@@ -140,9 +140,82 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
         )}
       </div>
 
+      {/* See all 버튼 */}
+      <div className="mt-4 text-center">
+        <button
+          onClick={() => handleModalToggle(true)}
+          className="w-full py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+        >
+          See all services
+        </button>
+      </div>
+
       <p className="text-gray-600 mt-4 text-sm">
         {serviceCount} services available
       </p>
+
+      {/* 서비스 모달 */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => handleModalToggle(false)}
+        title="All Services"
+      >
+        <div className="w-full">
+          {/* 카테고리 선택 영역 - 상단에 고정 */}
+          <div className="sticky top-0 z-10 bg-white pt-4 pb-4">
+            <div className="flex flex-wrap gap-2 px-4">
+              {sampleServiceCategories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    selectedCategory === category.id
+                      ? "bg-stone-950 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-gray-200 mt-4"></div>
+          </div>
+
+          {/* 서비스 목록 - 스크롤 가능 */}
+          <div className="space-y-4 px-4 py-2 pb-20">
+            {sampleServices
+              .filter((service) => service.category === selectedCategory)
+              .map((service) => (
+                <div
+                  key={service.id}
+                  className="border border-gray-200 rounded-lg p-4 flex justify-between items-start"
+                >
+                  <div>
+                    <h3 className="font-semibold text-lg">{service.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                      <span>{service.duration}</span>
+                      {service.femaleOnly && (
+                        <>
+                          <span>•</span>
+                          <span>Female only</span>
+                        </>
+                      )}
+                    </div>
+                    {service.description && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {service.description}
+                      </p>
+                    )}
+                    <p className="font-medium mt-2">{service.price}</p>
+                  </div>
+                  <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
+                    Book
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
