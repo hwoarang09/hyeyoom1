@@ -21,12 +21,20 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
   const handleModalToggle = (isOpen: boolean) => {
     setIsModalOpen(isOpen);
     setModalOpen(isOpen);
+
+    // 모달이 열릴 때 선택된 카테고리를 중앙으로 스크롤
+    if (isOpen) {
+      setTimeout(() => {
+        scrollToCategoryInModal(selectedCategory);
+      }, 100);
+    }
   };
 
   // 카테고리 스크롤을 위한 ref
   const categoriesRef = useRef<HTMLDivElement>(null);
+  const modalCategoriesRef = useRef<HTMLDivElement>(null);
 
-  // 선택된 카테고리를 중앙으로 스크롤하는 함수
+  // 선택된 카테고리를 중앙으로 스크롤하는 함수 (메인 화면용)
   const scrollToCategory = (categoryId: string) => {
     if (categoriesRef.current) {
       const container = categoriesRef.current;
@@ -54,6 +62,58 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
           behavior: "smooth",
         });
       }
+    }
+  };
+
+  // 선택된 카테고리를 중앙으로 스크롤하는 함수 (모달용)
+  const scrollToCategoryInModal = (categoryId: string) => {
+    if (modalCategoriesRef.current) {
+      const container = modalCategoriesRef.current;
+      const selectedButton = container.querySelector(
+        `button[data-category="${categoryId}"]`
+      );
+
+      if (selectedButton) {
+        // HTMLElement로 타입 캐스팅
+        const buttonElement = selectedButton as HTMLElement;
+
+        // 버튼의 위치와 컨테이너의 중앙 위치 계산
+        const buttonRect = buttonElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        // 버튼을 중앙에 위치시키기 위한 스크롤 위치 계산
+        const scrollLeft =
+          buttonElement.offsetLeft -
+          containerRect.width / 2 +
+          buttonRect.width / 2;
+
+        // 부드럽게 스크롤
+        container.scrollTo({
+          left: scrollLeft,
+          behavior: "smooth",
+        });
+      }
+
+      // 해당 카테고리 섹션으로 스크롤
+      setTimeout(() => {
+        const categorySection = document.getElementById(
+          `modal-category-${categoryId}`
+        );
+        if (categorySection) {
+          // 헤더 높이를 고려하여 스크롤 위치 조정 (헤더 높이 + 카테고리 버튼 영역 높이 + 여백)
+          const headerHeight = 120;
+          const scrollPosition = categorySection.offsetTop - headerHeight;
+
+          // 모달 컨테이너를 찾아서 스크롤
+          const modalContainer = document.querySelector(".modal-container");
+          if (modalContainer) {
+            modalContainer.scrollTo({
+              top: scrollPosition,
+              behavior: "smooth",
+            });
+          }
+        }
+      }, 100);
     }
   };
 
@@ -162,57 +222,84 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
       >
         <div className="w-full">
           {/* 카테고리 선택 영역 - 상단에 고정 */}
-          <div className="sticky top-0 z-10 bg-white pt-4 pb-4">
-            <div className="flex flex-wrap gap-2 px-4">
-              {sampleServiceCategories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    selectedCategory === category.id
-                      ? "bg-stone-950 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {category.name}
-                </button>
-              ))}
+          <div className="sticky top-0 z-10 bg-white pt-4 pb-2">
+            <div className="overflow-hidden">
+              <div
+                className="flex overflow-x-auto scrollbar-hide gap-3 px-4 pb-3"
+                ref={modalCategoriesRef}
+              >
+                {sampleServiceCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    data-category={category.id}
+                    onClick={() => {
+                      setSelectedCategory(category.id);
+                      scrollToCategoryInModal(category.id);
+                    }}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full text-sm ${
+                      selectedCategory === category.id
+                        ? "bg-stone-950 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="border-t border-gray-200 mt-4"></div>
+            <div className="border-t border-gray-200 mt-2"></div>
           </div>
 
           {/* 서비스 목록 - 스크롤 가능 */}
-          <div className="space-y-4 px-4 py-2 pb-20">
-            {sampleServices
-              .filter((service) => service.category === selectedCategory)
-              .map((service) => (
-                <div
-                  key={service.id}
-                  className="border border-gray-200 rounded-lg p-4 flex justify-between items-start"
-                >
-                  <div>
-                    <h3 className="font-semibold text-lg">{service.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                      <span>{service.duration}</span>
-                      {service.femaleOnly && (
-                        <>
-                          <span>•</span>
-                          <span>Female only</span>
-                        </>
-                      )}
-                    </div>
-                    {service.description && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {service.description}
-                      </p>
-                    )}
-                    <p className="font-medium mt-2">{service.price}</p>
-                  </div>
-                  <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
-                    Book
-                  </button>
+          <div className="space-y-4 px-4 py-4 pb-20">
+            {sampleServiceCategories.map((category) => (
+              <div
+                key={category.id}
+                id={`modal-category-${category.id}`}
+                className="mb-6"
+              >
+                <h3 className="text-lg font-semibold mb-3">{category.name}</h3>
+                <div className="space-y-4">
+                  {sampleServices
+                    .filter((service) => service.category === category.id)
+                    .map((service) => (
+                      <div
+                        key={service.id}
+                        className="border border-gray-200 rounded-lg p-4 flex justify-between items-start"
+                      >
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {service.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                            <span>{service.duration}</span>
+                            {service.femaleOnly && (
+                              <>
+                                <span>•</span>
+                                <span>Female only</span>
+                              </>
+                            )}
+                          </div>
+                          {service.description && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              {service.description}
+                            </p>
+                          )}
+                          <p className="font-medium mt-2">{service.price}</p>
+                        </div>
+                        <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
+                          Book
+                        </button>
+                      </div>
+                    ))}
                 </div>
-              ))}
+                {category.id !==
+                  sampleServiceCategories[sampleServiceCategories.length - 1]
+                    .id && (
+                  <div className="border-t border-gray-100 mt-6"></div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </Modal>

@@ -1,4 +1,3 @@
-import React from "react";
 import Navbar from "./components/layout/Navbar";
 import ImageSlider from "./components/photos/ImageSlider";
 import SalonInfo from "./components/salon/SalonInfo";
@@ -19,8 +18,6 @@ import {
   sampleReviews,
   sampleBuyOptions,
   sampleAbout,
-  locationReels,
-  promotionData,
 } from "./data/sampleData";
 
 function App() {
