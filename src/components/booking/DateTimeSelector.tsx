@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { useBookingStore } from "@/store/bookingStore";
 import { format, addDays, isSameDay } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // 날짜/시간 선택 컴포넌트
 const DateTimeSelector: React.FC = () => {
@@ -11,9 +10,7 @@ const DateTimeSelector: React.FC = () => {
 
   // 오늘 날짜 기준으로 7일간의 날짜 생성
   const today = new Date();
-  const availableDates = Array.from({ length: 7 }, (_, i) =>
-    addDays(today, i)
-  );
+  const availableDates = Array.from({ length: 7 }, (_, i) => addDays(today, i));
 
   // 시간 슬롯 (예시 데이터)
   const timeSlots = [
@@ -36,7 +33,7 @@ const DateTimeSelector: React.FC = () => {
   // 시간 선택 핸들러
   const handleTimeSelect = (time: string) => {
     setTime(time);
-    
+
     // 날짜와 시간이 모두 선택되었으면 확인 단계로 이동
     if (selectedDate) {
       setStep("confirmation");
@@ -61,15 +58,9 @@ const DateTimeSelector: React.FC = () => {
                   : "bg-gray-100 text-gray-800 hover:bg-gray-200"
               }`}
             >
-              <span className="text-sm">
-                {format(date, "EEE")}
-              </span>
-              <span className="text-lg font-bold">
-                {format(date, "d")}
-              </span>
-              <span className="text-xs">
-                {format(date, "MMM")}
-              </span>
+              <span className="text-sm">{format(date, "EEE")}</span>
+              <span className="text-lg font-bold">{format(date, "d")}</span>
+              <span className="text-xs">{format(date, "MMM")}</span>
             </button>
           ))}
         </div>

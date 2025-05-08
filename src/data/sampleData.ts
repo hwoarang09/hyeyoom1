@@ -9,30 +9,91 @@ export const sampleImages = [
 export const sampleShorts = [
   {
     id: "1",
-    thumbnail:
-      "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
-    title: "Summer Hairstyle Tips",
+    thumbnail: "/thumbnails/customer/customer_1.jpg", // 비디오 첫 프레임 썸네일
+    videoUrl: "/reels/customer/customer_1.mp4", // 비디오 경로
+    title: "빈티지펌 스타일",
+    description:
+      "반년전에 젤리펌 시술받으시고 커트만으로 빈티지펌 스타일 해드렸어요✨\n모발이 얇으신분\n볼륨이 부족하신분\n머리손질이 힘드신분들께 추천드려요!",
+    author: "@hae.yoonhoon",
+    hashtags: [
+      "sydneyhair",
+      "sydneykoreanhairsalon",
+      "sydneyhairdresser",
+      "sydneyhairsalon",
+      "sydneyhairstylist",
+      "시드니미용실",
+      "시드니한인미용실",
+      "시드니젤리펌",
+      "시드니빈티지펌",
+      "시드니히피펌",
+    ],
+    daysAgo: 4,
     views: 1200,
   },
   {
     id: "2",
-    thumbnail:
-      "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
-    title: "Quick Nail Art Tutorial",
+    thumbnail: "/thumbnails/customer/customer_2.jpg", // 비디오 첫 프레임 썸네일
+    videoUrl: "/reels/customer/customer_2.mp4", // 비디오 경로
+    title: "볼륨 매직 스타일",
+    description:
+      "볼륨 매직으로 자연스러운 스타일링이 가능해요\n곱슬거림이 있으신 분\n모발이 부스스하신 분\n스타일링이 어려우신 분께 추천드려요!",
+    author: "@hae.yoonhoon",
+    hashtags: [
+      "sydneyhair",
+      "sydneykoreanhairsalon",
+      "sydneyhairdresser",
+      "sydneyhairsalon",
+      "sydneyhairstylist",
+      "시드니미용실",
+      "시드니한인미용실",
+      "시드니볼륨매직",
+      "시드니매직",
+    ],
+    daysAgo: 2,
     views: 850,
   },
   {
     id: "3",
-    thumbnail:
-      "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=688&q=80",
-    title: "Facial Treatment Process",
+    thumbnail: "/thumbnails/customer/customer_3.jpg", // 비디오 첫 프레임 썸네일
+    videoUrl: "/reels/customer/customer_3.mp4", // 비디오 경로
+    title: "레이어드 컷 스타일",
+    description:
+      "레이어드 컷으로 가벼운 느낌과 볼륨감을 동시에 살렸어요\n머리가 무거우신 분\n층이 필요하신 분\n스타일링이 쉬운 머리를 원하시는 분께 추천드려요!",
+    author: "@hae.yoonhoon",
+    hashtags: [
+      "sydneyhair",
+      "sydneykoreanhairsalon",
+      "sydneyhairdresser",
+      "sydneyhairsalon",
+      "sydneyhairstylist",
+      "시드니미용실",
+      "시드니한인미용실",
+      "시드니레이어드컷",
+      "시드니헤어컷",
+    ],
+    daysAgo: 5,
     views: 2300,
   },
   {
     id: "4",
-    thumbnail:
-      "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
-    title: "Salon Tour",
+    thumbnail: "/thumbnails/customer/customer_4.jpg", // 비디오 첫 프레임 썸네일
+    videoUrl: "/reels/customer/customer_4.mp4", // 비디오 경로
+    title: "발레아쥬 염색 스타일",
+    description:
+      "발레아쥬 염색으로 자연스러운 그라데이션 효과를 연출했어요\n밝은 컬러를 원하시는 분\n자연스러운 그라데이션을 원하시는 분\n트렌디한 스타일을 원하시는 분께 추천드려요!",
+    author: "@hae.yoonhoon",
+    hashtags: [
+      "sydneyhair",
+      "sydneykoreanhairsalon",
+      "sydneyhairdresser",
+      "sydneyhairsalon",
+      "sydneyhairstylist",
+      "시드니미용실",
+      "시드니한인미용실",
+      "시드니발레아쥬",
+      "시드니염색",
+    ],
+    daysAgo: 1,
     views: 1500,
   },
 ];

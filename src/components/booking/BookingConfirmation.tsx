@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { useBookingStore } from "@/store/bookingStore";
 import { useCouponStore } from "@/store/couponStore";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 // 예약 확인 컴포넌트
 const BookingConfirmation: React.FC = () => {
   // 예약 상태 스토어에서 필요한 상태 가져오기
-  const { selectedServices, selectedDate, selectedTime, setStep } =
-    useBookingStore();
+  const { selectedServices, selectedDate, selectedTime } = useBookingStore();
 
   // 쿠폰 스토어에서 필요한 상태와 액션 가져오기
   const { getValidCoupons, selectedCouponId, selectCoupon, getCouponById } =
