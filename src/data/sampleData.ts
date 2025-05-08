@@ -37,28 +37,28 @@ export const sampleShorts = [
   },
 ];
 
-// 위치 관련 릴스 데이터 - public/reels 폴더의 실제 동영상 파일 사용 (852, 250, 565 순서로 변경)
+// 위치 관련 릴스 데이터 - public/reels/location 폴더의 실제 동영상 파일 사용 (852, 250, 565 순서로 변경)
 export const locationReels = [
   {
     id: "loc1",
     thumbnail:
       "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
     title: "How to get to HAEYOOM",
-    videoUrl: "/reels/Video-852.mp4", // public/reels 폴더의 실제 동영상 파일
+    videoUrl: "/reels/location/Video-852.mp4", // 경로 수정
   },
   {
     id: "loc2",
     thumbnail:
       "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
     title: "How to get to HAEYOOM",
-    videoUrl: "/reels/Video-250.mp4", // public/reels 폴더의 실제 동영상 파일
+    videoUrl: "/reels/location/Video-250.mp4", // 경로 수정
   },
   {
     id: "loc3",
     thumbnail:
       "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1036&q=80",
     title: "How to get to HAEYOOM",
-    videoUrl: "/reels/Video-565.mp4", // public/reels 폴더의 실제 동영상 파일
+    videoUrl: "/reels/location/Video-565.mp4", // 경로 수정
   },
 ];
 

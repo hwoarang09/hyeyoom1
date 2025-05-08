@@ -7,8 +7,11 @@ import TeamSection from "./components/team/TeamSection";
 import ReviewsSection from "./components/reviews/ReviewsSection";
 import BuySection from "./components/buy/BuySection";
 import AboutSection from "./components/about/AboutSection";
-import BookNowBar from "./components/layout/BookNowBar";
+import BookingStatusBar from "./components/layout/BookingStatusBar";
+import BookingContainer from "./components/booking/BookingContainer";
 import { useUIStore } from "./store/uiStore";
+import { useBookingStore } from "./store/bookingStore";
+import { Toaster } from "react-hot-toast";
 
 // 샘플 데이터 가져오기
 import {
@@ -24,8 +27,12 @@ function App() {
   // Zustand 스토어에서 모달 상태 가져오기
   const isAnyModalOpen = useUIStore((state) => state.isAnyModalOpen);
 
+  // 예약 상태 스토어에서 현재 단계 가져오기
+  const step = useBookingStore((state) => state.step);
+
   return (
     <div className="min-h-screen bg-white">
+      <Toaster position="top-center" />
       <Navbar />
 
       <main className="container mx-auto max-w-7xl pb-16">
@@ -80,7 +87,12 @@ function App() {
         <div className="h-10"></div>
       </main>
 
-      {!isAnyModalOpen && <BookNowBar />}
+      {!isAnyModalOpen && <BookingStatusBar />}
+
+      {/* 예약 컨테이너 (datetime-selection, confirmation, completed 단계에서만 표시) */}
+      {(step === "datetime-selection" ||
+        step === "confirmation" ||
+        step === "completed") && <BookingContainer />}
     </div>
   );
 }

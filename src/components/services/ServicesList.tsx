@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { sampleServices, sampleServiceCategories } from "@/data/sampleData";
 import Modal from "@/components/ui/Modal";
 import { useUIStore } from "@/store/uiStore";
+import { useBookingStore } from "@/store/bookingStore";
+import { Check, Plus } from "lucide-react";
 
 interface ServicesListProps {
   serviceCount: number;
@@ -16,6 +18,10 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
 
   // Zustand 스토어에서 모달 상태 설정 함수 가져오기
   const setModalOpen = useUIStore((state) => state.setModalOpen);
+
+  // 예약 상태 스토어에서 필요한 상태와 액션 가져오기
+  const { selectedServices, addService, removeService, setStep } =
+    useBookingStore();
 
   // 모달 상태 변경 핸들러
   const handleModalToggle = (isOpen: boolean) => {
@@ -127,6 +133,38 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // 서비스 선택 핸들러
+  const handleServiceToggle = (service: {
+    id: string;
+    name: string;
+    duration: string;
+    price: string;
+    category: string;
+    femaleOnly?: boolean;
+    description?: string;
+  }) => {
+    // 이미 선택된 서비스인지 확인
+    const isSelected = isServiceSelected(service.id);
+
+    if (isSelected) {
+      // 선택된 서비스라면 제거
+      removeService(service.id);
+    } else {
+      // 선택되지 않은 서비스라면 추가
+      addService(service);
+
+      // 첫 서비스 선택 시 예약 단계 업데이트
+      if (selectedServices.length === 0) {
+        setStep("service-selection");
+      }
+    }
+  };
+
+  // 서비스가 선택되었는지 확인하는 함수
+  const isServiceSelected = (serviceId: string): boolean => {
+    return selectedServices.some((service) => service.id === serviceId);
+  };
+
   // 선택된 카테고리에 해당하는 서비스 필터링
   const filteredServices = sampleServices.filter(
     (service) => service.category === selectedCategory
@@ -188,8 +226,27 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
                 )}
                 <p className="font-medium mt-2">{service.price}</p>
               </div>
-              <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
-                Book
+              <button
+                onClick={() => handleServiceToggle(service)}
+                className={`rounded-full px-4 py-1 text-sm flex items-center justify-center gap-1 ${
+                  isServiceSelected(service.id)
+                    ? "bg-black text-white"
+                    : selectedServices.length > 0
+                    ? "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50"
+                    : "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50"
+                }`}
+              >
+                {isServiceSelected(service.id) ? (
+                  <>
+                    <Check size={14} /> Selected
+                  </>
+                ) : selectedServices.length > 0 ? (
+                  <>
+                    <Plus size={14} /> Add
+                  </>
+                ) : (
+                  "Book"
+                )}
               </button>
             </div>
           ))
@@ -290,8 +347,27 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
                           )}
                           <p className="font-medium mt-2">{service.price}</p>
                         </div>
-                        <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
-                          Book
+                        <button
+                          onClick={() => handleServiceToggle(service)}
+                          className={`rounded-full px-4 py-1 text-sm flex items-center justify-center gap-1 ${
+                            isServiceSelected(service.id)
+                              ? "bg-black text-white"
+                              : selectedServices.length > 0
+                              ? "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50"
+                              : "bg-white border border-gray-300 text-gray-800 hover:bg-gray-50"
+                          }`}
+                        >
+                          {isServiceSelected(service.id) ? (
+                            <>
+                              <Check size={14} /> Selected
+                            </>
+                          ) : selectedServices.length > 0 ? (
+                            <>
+                              <Plus size={14} /> Add
+                            </>
+                          ) : (
+                            "Book"
+                          )}
                         </button>
                       </div>
                     ))}
