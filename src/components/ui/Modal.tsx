@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useLayoutEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -53,18 +53,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 모달이 열릴 때 스크롤 위치 저장 및 배경 스크롤 비활성화
-  useLayoutEffect(() => {
+  // 모달이 열리고 닫힐 때 스크롤 처리 - 매우 단순화된 방식
+  useEffect(() => {
+    // 모달이 열릴 때
     if (isOpen) {
       // 현재 스크롤 위치 저장
-      const scrollY = window.scrollY;
-      scrollYRef.current = scrollY;
+      scrollYRef.current = window.scrollY;
 
-      // 배경 스크롤 비활성화 (iOS Safari에서도 작동하는 방식)
+      // 배경 스크롤 비활성화 (가장 간단한 방식)
       document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
 
       // 모달 내부 스크롤을 맨 위로 이동
       setTimeout(() => {
@@ -74,37 +71,25 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         }
       }, 10);
     }
+    // 모달이 닫힐 때
+    else if (scrollYRef.current > 0) {
+      // 스크롤 활성화
+      document.body.style.overflow = "";
 
+      // 스크롤 위치 복원
+      window.scrollTo(0, scrollYRef.current);
+    }
+
+    // 컴포넌트 언마운트 시
     return () => {
-      // 모달이 닫힐 때만 실행 (언마운트 시)
-      if (isOpen && scrollYRef.current > 0) {
-        // 스타일 복원
+      if (document.body.style.overflow === "hidden") {
         document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
 
-        // 스크롤 복원
-        window.scrollTo(0, scrollYRef.current);
+        if (scrollYRef.current > 0) {
+          window.scrollTo(0, scrollYRef.current);
+        }
       }
     };
-  }, [isOpen]);
-
-  // 모달이 닫힐 때 스크롤 위치 복원
-  useEffect(() => {
-    if (!isOpen && scrollYRef.current > 0) {
-      // 스타일 복원
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-
-      // 스크롤 복원
-      const scrollY = scrollYRef.current;
-      setTimeout(() => {
-        window.scrollTo(0, scrollY);
-      }, 0);
-    }
   }, [isOpen]);
 
   if (!isOpen) return null;
