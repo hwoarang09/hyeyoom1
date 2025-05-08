@@ -102,9 +102,9 @@ const LocationReelsModal: React.FC<LocationReelsModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Location">
       <div className="w-full">
-        {/* 릴스 내용 */}
+        {/* 릴스 내용 - 상단에 고정 */}
         <div
-          className="bg-black flex items-center justify-center"
+          className="sticky top-0 z-10 bg-black flex items-center justify-center"
           style={{ height: "80vh" }}
         >
           <div className="relative w-full h-full">
@@ -244,6 +244,8 @@ const LocationReelsModal: React.FC<LocationReelsModalProps> = ({
               )}
             </button>
           </div>
+          {/* 구분선 추가 */}
+          <div className="border-t border-gray-800 mt-2"></div>
         </div>
 
         {/* 릴스 정보 */}

@@ -44,10 +44,12 @@ const SalonInfo: React.FC<SalonInfoProps> = ({
     <div className="px-4 py-5">
       <h1 className="text-2xl font-bold mb-1">{name}</h1>
 
-      {subtitle && <p className="text-gray-700 font-medium mb-1">{subtitle}</p>}
-      {slogan && <p className="text-gray-600 italic mb-2">{slogan}</p>}
+      {subtitle && (
+        <p className="text-gray-700 font-medium text-sm mb-1">{subtitle}</p>
+      )}
+      {slogan && <p className="text-gray-600 italic text-xs mb-2">{slogan}</p>}
 
-      <p className="text-gray-600 mb-2">{location}</p>
+      <p className="text-gray-600 text-xs mb-2">{location}</p>
 
       <div className="mb-4">
         <span

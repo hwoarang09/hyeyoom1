@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import { useUIStore } from "@/store/uiStore";
+import React, { useEffect, useRef, useLayoutEffect } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,12 +7,13 @@ interface ModalProps {
   children: React.ReactNode;
 }
 
+// 모달 컴포넌트 - 새로운 구조로 재설계
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-  // Zustand 스토어에서 스크롤 위치 관련 함수 가져오기
-  const saveScrollPosition = useUIStore((state) => state.saveScrollPosition);
-
   // 히스토리 상태 추가 여부를 추적하는 ref
   const historyStateAdded = useRef(false);
+
+  // 스크롤 위치를 저장하기 위한 ref
+  const scrollYRef = useRef(0);
 
   // 브라우저 뒤로가기 버튼 처리
   useEffect(() => {
@@ -53,66 +53,59 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 스크롤 위치를 저장하기 위한 ref
-  const scrollPositionRef = useRef(0);
-
-  // 모달이 열리면 스크롤 위치 저장 및 배경 스크롤 비활성화, 닫히면 이전 위치로 복원
-  useEffect(() => {
+  // 모달이 열릴 때 스크롤 위치 저장 및 배경 스크롤 비활성화
+  useLayoutEffect(() => {
     if (isOpen) {
-      // 현재 스크롤 위치 저장 (ref와 store 모두에 저장)
-      const currentScrollPosition = window.scrollY;
-      scrollPositionRef.current = currentScrollPosition;
-      saveScrollPosition(currentScrollPosition);
+      // 현재 스크롤 위치 저장
+      const scrollY = window.scrollY;
+      scrollYRef.current = scrollY;
 
-      // 배경 스크롤 완전히 비활성화 (일관된 방식으로 적용)
+      // 배경 스크롤 비활성화 (iOS Safari에서도 작동하는 방식)
       document.body.style.overflow = "hidden";
       document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
-      document.body.style.top = `-${currentScrollPosition}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
 
       // 모달 내부 스크롤을 맨 위로 이동
       setTimeout(() => {
-        const modalContainer = document.querySelector(".modal-container");
-        if (modalContainer) {
-          modalContainer.scrollTop = 0;
+        const modalContent = document.querySelector(".modal-content");
+        if (modalContent) {
+          modalContent.scrollTop = 0;
         }
       }, 10);
-    } else if (scrollPositionRef.current > 0) {
-      // 모달이 닫힐 때만 실행 (초기 렌더링 시에는 실행하지 않음)
-
-      // 스타일 초기화
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.width = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-
-      // ref에 저장된 스크롤 위치로 복원 (더 안정적)
-      const scrollY = scrollPositionRef.current;
-
-      // RAF를 사용하여 브라우저 렌더링 사이클에 맞춰 스크롤 복원
-      requestAnimationFrame(() => {
-        window.scrollTo(0, scrollY);
-      });
     }
 
-    // 컴포넌트 언마운트 시 원래 스크롤 상태로 복원
     return () => {
-      if (scrollPositionRef.current > 0) {
+      // 모달이 닫힐 때만 실행 (언마운트 시)
+      if (isOpen && scrollYRef.current > 0) {
+        // 스타일 복원
         document.body.style.overflow = "";
         document.body.style.position = "";
-        document.body.style.width = "";
         document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
+        document.body.style.width = "";
 
-        window.scrollTo(0, scrollPositionRef.current);
+        // 스크롤 복원
+        window.scrollTo(0, scrollYRef.current);
       }
     };
-  }, [isOpen, saveScrollPosition]);
+  }, [isOpen]);
+
+  // 모달이 닫힐 때 스크롤 위치 복원
+  useEffect(() => {
+    if (!isOpen && scrollYRef.current > 0) {
+      // 스타일 복원
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+
+      // 스크롤 복원
+      const scrollY = scrollYRef.current;
+      setTimeout(() => {
+        window.scrollTo(0, scrollY);
+      }, 0);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -121,19 +114,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
       {/* 배경 오버레이 */}
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose}></div>
 
-      {/* 모달 컨테이너 */}
-      <div
-        className="fixed inset-0 z-50 bg-white modal-container"
-        style={{
-          width: "100%",
-          height: "100%",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        {/* 모달 헤더 - 상단에 고정 */}
-        <div className="sticky top-0 left-0 right-0 z-10 bg-white">
-          <div className="flex justify-between items-center p-4 border-b">
+      {/* 모달 전체 컨테이너 - 고정 레이아웃 */}
+      <div className="fixed inset-0 z-50 flex flex-col bg-white">
+        {/* 모달 헤더 - 고정 영역 */}
+        <div className="flex-none bg-white border-b">
+          <div className="flex justify-between items-center p-4">
             <div className="flex items-center">
               <button
                 onClick={onClose}
@@ -180,8 +165,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
           </div>
         </div>
 
-        {/* 모달 내용 */}
-        <div className="w-full">{children}</div>
+        {/* 모달 메인 - 스크롤 가능 영역 */}
+        <div className="flex-grow overflow-y-auto modal-content">
+          {children}
+        </div>
       </div>
     </>
   );

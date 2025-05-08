@@ -65,21 +65,32 @@ const BuySection: React.FC<BuySectionProps> = ({ options }) => {
         onClose={() => handleModalToggle(false)}
         title="All Purchase Options"
       >
-        <div className="px-4 py-4 space-y-4 w-full">
-          {options.map((option) => (
-            <div
-              key={option.id}
-              className="flex justify-between items-center p-3 border border-gray-200 rounded-lg"
-            >
-              <div>
-                <h3 className="font-medium">{option.title}</h3>
-                <p className="text-sm text-gray-600">{option.description}</p>
+        <div className="w-full">
+          {/* 헤더 - 상단에 고정 */}
+          <div className="sticky top-0 z-10 bg-white pt-4 pb-2">
+            <h3 className="px-4 font-medium text-gray-700">
+              Select an option to purchase
+            </h3>
+            <div className="border-t border-gray-200 mt-4"></div>
+          </div>
+
+          {/* 구매 옵션 목록 */}
+          <div className="px-4 py-4 space-y-4">
+            {options.map((option) => (
+              <div
+                key={option.id}
+                className="flex justify-between items-center p-3 border border-gray-200 rounded-lg"
+              >
+                <div>
+                  <h3 className="font-medium">{option.title}</h3>
+                  <p className="text-sm text-gray-600">{option.description}</p>
+                </div>
+                <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
+                  Buy
+                </button>
               </div>
-              <button className="bg-white border border-gray-300 text-gray-800 rounded-full px-4 py-1 text-sm hover:bg-gray-50">
-                Buy
-              </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Modal>
     </div>

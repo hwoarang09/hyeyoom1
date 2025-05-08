@@ -221,8 +221,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
         title="All Reviews"
       >
         <div className="w-full">
-          {/* 평균 평점 - 상단에 고정 */}
-          <div className="sticky top-0 z-10 bg-white pt-4 pb-4 px-4">
+          {/* 컨텐츠 헤더 - 고정되지 않음 */}
+          <div className="bg-white pt-4 pb-4 px-4">
             <div className="flex items-center gap-2">
               {renderStars(averageRating)}
               <span className="font-semibold">

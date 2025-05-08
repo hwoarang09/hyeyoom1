@@ -40,7 +40,7 @@ function App() {
           location="SHOP 6.11, SHEPHERDS BAY PLAZA, 11A BAY DRIVE, MEADOWBANK NSW 2114"
           status="closed"
           openingTime="Friday at 9:00 AM"
-          slogan="아름다운 생각, 혜윤 (Beautiful thoughts, HAEYOOM)"
+          slogan="아름다운 생각, 혜윰 (Beautiful thoughts, HAEYOOM)"
           subtitle="No.1 Sydney Hair Salon"
         />
 

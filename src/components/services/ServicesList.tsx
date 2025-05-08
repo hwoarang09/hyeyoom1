@@ -221,33 +221,36 @@ const ServicesList: React.FC<ServicesListProps> = ({ serviceCount }) => {
         title="All Services"
       >
         <div className="w-full">
-          {/* 카테고리 선택 영역 - 상단에 고정 */}
-          <div className="sticky top-0 z-10 bg-white pt-4 pb-2">
-            <div className="overflow-hidden">
-              <div
-                className="flex overflow-x-auto scrollbar-hide gap-3 px-4 pb-3"
-                ref={modalCategoriesRef}
-              >
-                {sampleServiceCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    data-category={category.id}
-                    onClick={() => {
-                      setSelectedCategory(category.id);
-                      scrollToCategoryInModal(category.id);
-                    }}
-                    className={`whitespace-nowrap px-4 py-2 rounded-full text-sm ${
-                      selectedCategory === category.id
-                        ? "bg-stone-950 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
+          {/* 카테고리 선택 영역 - 고정되지 않음 */}
+          <div className="bg-white">
+            {/* 카테고리 버튼 영역 */}
+            <div className="pt-4 pb-2">
+              <div className="overflow-hidden">
+                <div
+                  className="flex overflow-x-auto scrollbar-hide gap-3 px-4 pb-3"
+                  ref={modalCategoriesRef}
+                >
+                  {sampleServiceCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      data-category={category.id}
+                      onClick={() => {
+                        setSelectedCategory(category.id);
+                        scrollToCategoryInModal(category.id);
+                      }}
+                      className={`whitespace-nowrap px-4 py-2 rounded-full text-sm ${
+                        selectedCategory === category.id
+                          ? "bg-stone-950 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
               </div>
+              <div className="border-t border-gray-200 mt-2"></div>
             </div>
-            <div className="border-t border-gray-200 mt-2"></div>
           </div>
 
           {/* 서비스 목록 - 스크롤 가능 */}
