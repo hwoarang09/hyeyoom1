@@ -3,65 +3,11 @@ import Modal from "@/components/ui/Modal";
 import ShortsModal from "@/components/shorts/ShortsModal";
 import { useUIStore } from "@/store/uiStore";
 
-// 비디오 썸네일 캡처 함수 타입
-type VideoThumbnailCaptureFunction = (
-  videoUrl: string,
-  callback: (thumbnailUrl: string) => void
-) => void;
-
-// 비디오 썸네일 캡처 함수
-const captureVideoThumbnail: VideoThumbnailCaptureFunction = (
-  videoUrl,
-  callback
-) => {
-  // 비디오 요소 생성
-  const video = document.createElement("video");
-  video.crossOrigin = "anonymous"; // CORS 이슈 방지
-  video.src = videoUrl;
-  video.muted = true;
-  video.preload = "metadata";
-
-  // 비디오 로드 이벤트 핸들러
-  video.onloadeddata = () => {
-    // 비디오의 첫 프레임으로 이동
-    video.currentTime = 0.1; // 0.1초로 설정하여 첫 프레임 캡처
-  };
-
-  // 시간 업데이트 이벤트 핸들러
-  video.onseeked = () => {
-    // 캔버스 생성
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // 비디오 프레임을 캔버스에 그리기
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // 캔버스 이미지를 데이터 URL로 변환
-      const thumbnailUrl = canvas.toDataURL("image/jpeg");
-
-      // 콜백 함수 호출
-      callback(thumbnailUrl);
-    }
-
-    // 메모리 정리
-    video.pause();
-    video.src = "";
-    video.load();
-  };
-
-  // 에러 핸들러
-  video.onerror = () => {
-    console.error("Error loading video:", videoUrl);
-    // 에러 발생 시 기본 썸네일 사용
-    callback("");
-  };
-
-  // 비디오 로드 시작
-  video.load();
-};
+// 비디오 썸네일 캡처 함수 타입 (주석 처리)
+// type VideoThumbnailCaptureFunction = (
+//   videoUrl: string,
+//   callback: (thumbnailUrl: string) => void
+// ) => void;
 
 interface Short {
   id: string;
@@ -82,6 +28,25 @@ interface ShortsSectionProps {
 const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // 스크롤 버튼 핸들러
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -200,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 200,
+        behavior: "smooth",
+      });
+    }
+  };
+
   // 최대 10개의 쇼츠만 표시
   const displayedShorts = shorts.slice(0, 10);
   const hasMoreShorts = shorts.length > 10;
@@ -101,7 +66,7 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
     // 비디오 URL 배열 생성 - 각 쇼츠의 videoUrl 속성 사용
     const videos = displayedShorts.map((short) => short.videoUrl);
     setShortsVideos(videos);
-  }, [displayedShorts]);
+  }, [shorts]); // displayedShorts는 shorts에서 파생되므로 shorts를 의존성으로 사용
 
   // 모달 상태 변경 핸들러
   const handleModalToggle = (isOpen: boolean) => {
@@ -111,8 +76,11 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
 
   // 비디오 모달 열기
   const openVideoModal = (index: number) => {
+    // 상태 업데이트를 일괄 처리하여 불필요한 렌더링 방지
     setSelectedVideoIndex(index);
     setCurrentShortsIndex(index);
+
+    // 모달 상태 업데이트
     setIsVideoModalOpen(true);
     setModalOpen(true);
   };
@@ -125,64 +93,130 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
 
   // 비디오 변경 핸들러
   const handleChangeVideo = (index: number) => {
-    setCurrentShortsIndex(index);
-    setSelectedVideoIndex(index);
+    // 현재 인덱스와 다를 때만 상태 업데이트 (불필요한 렌더링 방지)
+    if (currentShortsIndex !== index || selectedVideoIndex !== index) {
+      setCurrentShortsIndex(index);
+      setSelectedVideoIndex(index);
+    }
   };
 
   return (
     <div className="px-4 py-5 border-t border-gray-200">
-      <h2 className="text-xl font-bold mb-4">Shorts</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Shorts</h2>
 
-      <div
-        className="flex overflow-x-auto scrollbar-hide gap-3 pb-2"
-        ref={scrollContainerRef}
-      >
-        {displayedShorts.map((short, index) => (
-          <div
-            key={short.id}
-            className="flex-shrink-0 w-28 cursor-pointer"
-            onClick={() => openVideoModal(index)}
+        {/* 스크롤 버튼 */}
+        <div className="flex gap-2">
+          <button
+            onClick={handleScrollLeft}
+            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200"
+            aria-label="Scroll left"
           >
-            <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-1">
-              <img
-                src={short.thumbnail}
-                alt={short.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
-                {short.views >= 1000
-                  ? `${(short.views / 1000).toFixed(1)}K`
-                  : short.views}
-              </div>
-              {/* 재생 아이콘 추가 */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <div className="bg-black/30 rounded-full p-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleScrollRight}
+            className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200"
+            aria-label="Scroll right"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="relative">
+        <div
+          className="flex overflow-x-auto gap-3 pb-4 pt-1 px-1 snap-x snap-mandatory touch-pan-x"
+          style={{
+            scrollbarWidth: "none", // Firefox
+            WebkitOverflowScrolling: "touch",
+            msOverflowStyle: "none", // IE and Edge
+          }}
+          ref={scrollContainerRef}
+        >
+          {displayedShorts.map((short, index) => (
+            <div
+              key={short.id}
+              className="flex-shrink-0 w-28 cursor-pointer snap-start"
+              onClick={() => openVideoModal(index)}
+            >
+              <div className="relative aspect-[9/16] rounded-lg overflow-hidden mb-1">
+                <img
+                  src={short.thumbnail}
+                  alt={short.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                  {short.views >= 1000
+                    ? `${(short.views / 1000).toFixed(1)}K`
+                    : short.views}
+                </div>
+                {/* 재생 아이콘 추가 */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <div className="bg-black/30 rounded-full p-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
+              <h3 className="text-xs font-medium truncate">{short.title}</h3>
             </div>
-            <h3 className="text-xs font-medium truncate">{short.title}</h3>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* 스크롤 인디케이터 */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-1 py-1">
+          {displayedShorts.length > 3 && (
+            <div className="h-1 bg-gray-200 rounded-full w-20">
+              <div
+                className="h-1 bg-gray-400 rounded-full"
+                style={{ width: "30%" }}
+              ></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* See all 버튼을 하단에 배치 */}

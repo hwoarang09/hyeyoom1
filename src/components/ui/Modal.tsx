@@ -5,10 +5,17 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  contentClassName?: string; // 추가: 모달 컨텐츠에 적용할 추가 클래스
 }
 
 // 모달 컴포넌트 - 새로운 구조로 재설계
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  contentClassName = "",
+}) => {
   // 히스토리 상태 추가 여부를 추적하는 ref
   const historyStateAdded = useRef(false);
 
@@ -151,7 +158,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
         </div>
 
         {/* 모달 메인 - 스크롤 가능 영역 */}
-        <div className="flex-grow overflow-y-auto modal-content">
+        <div
+          className={`flex-grow overflow-y-auto modal-content ${contentClassName}`}
+        >
           {children}
         </div>
       </div>

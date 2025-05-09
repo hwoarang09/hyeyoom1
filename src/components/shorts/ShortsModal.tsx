@@ -26,15 +26,18 @@ interface ShortsModalProps {
 const shortsScrollStyle = `
 .shorts-container {
   scroll-snap-type: y mandatory;
-  height: calc(100vh - 60px); /* 모달 헤더 높이 고려 */
+  height: 100%; /* 모달 컨텐츠 영역 전체 높이 사용 */
   overflow-y: auto;
   position: relative;
   scroll-behavior: smooth; /* 부드러운 스크롤 효과 */
+  overscroll-behavior: contain; /* 스크롤 경계에서 바운스 방지 */
+  touch-action: pan-y; /* 수직 스크롤만 허용 */
 }
 
 .shorts-item {
   scroll-snap-align: start;
-  height: calc(100vh - 60px); /* 모달 헤더 높이 고려 */
+  height: 100vh; /* 뷰포트 높이 사용 */
+  max-height: calc(100vh - 60px); /* 모달 헤더 높이 고려 */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -78,6 +81,7 @@ const shortsScrollStyle = `
   flex-direction: column;
   align-items: center;
   animation: pulse 1.5s infinite;
+  pointer-events: none; /* 화살표가 클릭 이벤트를 방해하지 않도록 */
 }
 
 .scroll-arrow.up {
@@ -92,6 +96,11 @@ const shortsScrollStyle = `
   0% { opacity: 0.5; }
   50% { opacity: 1; }
   100% { opacity: 0.5; }
+}
+
+/* 모달 내부 스크롤 방지 */
+.modal-content-override {
+  overflow: hidden !important;
 }
 `;
 
@@ -145,7 +154,10 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
       const containerHeight = container.clientHeight;
 
       // 각 쇼츠 아이템의 높이는 containerHeight와 동일
-      const visibleIndex = Math.round(scrollTop / containerHeight);
+      // Math.round 대신 Math.floor 사용하여 더 정확한 스냅 동작
+      const visibleIndex = Math.floor(
+        (scrollTop + containerHeight / 3) / containerHeight
+      );
 
       // 인덱스가 변경되었을 때만 상태 업데이트
       if (
@@ -153,6 +165,9 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
         visibleIndex >= 0 &&
         visibleIndex < videos.length
       ) {
+        console.log(
+          `Changing video index to ${visibleIndex} (scroll position: ${scrollTop})`
+        );
         setCurrentVideoIndex(visibleIndex);
         if (onChangeVideo) onChangeVideo(visibleIndex);
 
@@ -165,7 +180,6 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
             video
               .play()
               .then(() => {
-                console.log(`Playing video ${idx} after scroll`);
                 setIsPlaying(true);
               })
               .catch((err) => console.error(`Video ${idx} play error:`, err));
@@ -173,29 +187,73 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
             // 화면에 보이지 않는 비디오 일시정지
             if (!video.paused) {
               video.pause();
-              console.log(`Paused video ${idx} after scroll`);
             }
           }
         });
       }
     };
 
-    // 스크롤 이벤트 핸들러
+    // 스크롤 이벤트 핸들러 - Intersection Observer 사용
+    const videoObservers: IntersectionObserver[] = [];
+
+    // 각 비디오 요소에 대한 Intersection Observer 설정
+    const setupIntersectionObservers = () => {
+      // 기존 옵저버 정리
+      videoObservers.forEach((observer) => observer.disconnect());
+      videoObservers.length = 0;
+
+      // 각 쇼츠 아이템에 대한 옵저버 생성
+      const shortsItems = container.querySelectorAll(".shorts-item");
+      shortsItems.forEach((item, index) => {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
+                // 70% 이상 보이면 현재 비디오로 간주
+                if (currentVideoIndex !== index) {
+                  setCurrentVideoIndex(index);
+                  if (onChangeVideo) onChangeVideo(index);
+
+                  // 비디오 재생/일시정지 처리
+                  videoRefs.current.forEach((video, idx) => {
+                    if (!video) return;
+
+                    if (idx === index) {
+                      video
+                        .play()
+                        .catch((err) =>
+                          console.error(`Video ${idx} play error:`, err)
+                        );
+                      setIsPlaying(true);
+                    } else if (!video.paused) {
+                      video.pause();
+                    }
+                  });
+                }
+              }
+            });
+          },
+          {
+            root: container,
+            threshold: 0.7, // 70% 이상 보일 때 콜백 실행
+            rootMargin: "0px",
+          }
+        );
+
+        observer.observe(item);
+        videoObservers.push(observer);
+      });
+    };
+
+    // 스크롤 이벤트 핸들러 - 백업 메커니즘
     const handleScroll = () => {
       // 스크롤 이벤트가 너무 자주 발생하지 않도록 throttle 적용
       if (!scrollTimeoutRef.current) {
         scrollTimeoutRef.current = setTimeout(() => {
           determineVisibleVideoIndex();
           scrollTimeoutRef.current = null;
-        }, 50); // 더 빠른 응답을 위해 시간 단축
+        }, 100);
       }
-    };
-
-    // 마우스 휠 이벤트 핸들러 (PC용)
-    const handleWheel = (e: WheelEvent) => {
-      // 휠 이벤트가 발생했을 때 현재 보이는 비디오 확인
-      e;
-      determineVisibleVideoIndex();
     };
 
     // 키보드 이벤트 핸들러 (PC용)
@@ -234,50 +292,64 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
               .play()
               .catch((err) => console.error("Video play error:", err));
           }
+
+          // Intersection Observer 설정
+          setupIntersectionObservers();
         }
-      }, 200);
+      }, 300);
     }
 
     // 이벤트 리스너 추가
     container.addEventListener("scroll", handleScroll);
-    container.addEventListener("wheel", handleWheel);
     window.addEventListener("keydown", handleKeyDown);
 
-    // 윈도우 크기 변경 시 스크롤 위치 조정
+    // 윈도우 크기 변경 시 스크롤 위치 조정 및 옵저버 재설정
     const handleResize = () => {
       if (container) {
         container.scrollTop = currentVideoIndex * container.clientHeight;
+
+        // 화면 크기가 변경되면 Intersection Observer 재설정
+        setupIntersectionObservers();
       }
     };
 
     window.addEventListener("resize", handleResize);
 
+    // 초기 Intersection Observer 설정
+    setupIntersectionObservers();
+
     return () => {
+      // 이벤트 리스너 제거
       container.removeEventListener("scroll", handleScroll);
-      container.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("resize", handleResize);
+
+      // 타임아웃 정리
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
+
+      // 옵저버 정리
+      videoObservers.forEach((observer) => observer.disconnect());
     };
   }, [currentVideoIndex, videos.length, onChangeVideo, currentIndex]);
 
   // currentIndex prop이 변경될 때 currentVideoIndex 업데이트
   useEffect(() => {
-    setCurrentVideoIndex(currentIndex);
+    // 현재 인덱스가 변경되었을 때만 상태 업데이트 (불필요한 렌더링 방지)
+    if (currentVideoIndex !== currentIndex) {
+      setCurrentVideoIndex(currentIndex);
 
-    // 컨테이너가 있으면 해당 인덱스로 스크롤
-    if (containerRef.current && videos.length > 0) {
-      containerRef.current.scrollTop =
-        currentIndex * containerRef.current.clientHeight;
+      // 컨테이너가 있으면 해당 인덱스로 스크롤
+      if (containerRef.current && videos.length > 0) {
+        containerRef.current.scrollTop =
+          currentIndex * containerRef.current.clientHeight;
+      }
     }
-  }, [currentIndex, videos.length]);
+  }, [currentIndex, videos.length, currentVideoIndex]);
 
   // 현재 비디오 인덱스가 변경될 때 비디오 재생 및 다른 비디오 일시정지
   useEffect(() => {
-    console.log(`Video index changed to: ${currentVideoIndex}`);
-
     // 모든 비디오 확인 및 제어
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
@@ -288,12 +360,10 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
           console.error(`Failed to play video ${index}:`, error);
         });
         setIsPlaying(true);
-        console.log(`Playing video ${index}`);
       } else {
         // 다른 비디오 일시정지
         if (!video.paused) {
           video.pause();
-          console.log(`Paused video ${index}`);
         }
       }
     });
@@ -305,9 +375,12 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
   // Zustand 스토어에서 모달 상태 설정 함수 가져오기
   const setModalOpen = useUIStore((state) => state.setModalOpen);
 
-  // 모달이 열릴 때 모달 상태 설정
+  // 모달이 열릴 때 모달 상태 설정 (전역 상태 업데이트)
   useEffect(() => {
-    setModalOpen(isOpen);
+    // 전역 상태 업데이트 - 이미 ShortsSection에서 설정되었을 수 있으므로 중복 호출 방지
+    if (isOpen) {
+      setModalOpen(true);
+    }
   }, [isOpen, setModalOpen]);
 
   // 비디오 재생/일시정지 토글
@@ -331,27 +404,32 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
     if (isOpen) {
       // 약간의 지연 후 현재 비디오 재생 (DOM이 완전히 로드된 후)
       setTimeout(() => {
-        // 모든 비디오 확인 및 제어
-        videoRefs.current.forEach((video, index) => {
-          if (!video) return;
+        // 컨테이너가 있으면 해당 인덱스로 스크롤
+        if (containerRef.current && videos.length > 0) {
+          // 스크롤 위치 재설정
+          containerRef.current.scrollTop =
+            currentVideoIndex * containerRef.current.clientHeight;
 
-          if (index === currentVideoIndex) {
-            // 현재 비디오 재생
-            video.play().catch((error) => {
-              console.error(
-                `Failed to play video ${index} on modal open:`,
-                error
-              );
-            });
-            setIsPlaying(true);
-            console.log(`Playing video ${index} on modal open`);
-          } else {
-            // 다른 비디오 일시정지
-            video.pause();
-            console.log(`Paused video ${index} on modal open`);
-          }
-        });
-      }, 300);
+          // 모든 비디오 확인 및 제어
+          videoRefs.current.forEach((video, index) => {
+            if (!video) return;
+
+            if (index === currentVideoIndex) {
+              // 현재 비디오 재생
+              video.play().catch((error) => {
+                console.error(
+                  `Failed to play video ${index} on modal open:`,
+                  error
+                );
+              });
+              setIsPlaying(true);
+            } else {
+              // 다른 비디오 일시정지
+              video.pause();
+            }
+          });
+        }
+      }, 400); // 약간 더 긴 지연 시간으로 DOM이 완전히 로드되도록 함
     }
 
     return () => {
@@ -362,12 +440,17 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
         }
       });
     };
-  }, [isOpen, currentVideoIndex]);
+  }, [isOpen, currentVideoIndex, videos.length]);
 
   // 이전 코드에서 사용하지 않는 변수들 제거
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Shorts">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Shorts"
+      contentClassName="modal-content-override"
+    >
       {/* 스크롤 스타일 추가 */}
       <style>{shortsScrollStyle}</style>
 
@@ -516,19 +599,6 @@ const ShortsModal: React.FC<ShortsModalProps> = ({
                       </span>
                     ))}
                   </div>
-
-                  {/* 스크롤 안내 */}
-                  {videos.length > 1 && (
-                    <div className="text-xs text-gray-400 text-center mt-3">
-                      {index === 0 && index < videos.length - 1 ? (
-                        <span>아래로 스크롤하여 다음 비디오 보기</span>
-                      ) : index > 0 && index === videos.length - 1 ? (
-                        <span>위로 스크롤하여 이전 비디오 보기</span>
-                      ) : index > 0 && index < videos.length - 1 ? (
-                        <span>스크롤하여 다른 비디오 보기</span>
-                      ) : null}
-                    </div>
-                  )}
                 </div>
               </div>
             );
