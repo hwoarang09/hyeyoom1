@@ -21,7 +21,7 @@ const Navbar: React.FC = () => {
 
     if (section) {
       // 네비게이션 바 높이를 고려하여 스크롤 위치 조정
-      const navbarHeight = 100; // 대략적인 네비게이션 바 높이
+      const navbarHeight = 70; // 줄어든 네비게이션 바 높이
       const sectionTop =
         section.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
 
@@ -52,8 +52,8 @@ const Navbar: React.FC = () => {
         setShowHeader(scrollPosition >= photosSectionBottom - 50); // 50px 정도 여유를 두고 헤더 표시
       }
 
-      // 탭 선택을 위한 스크롤 위치 (네비게이션 바 높이 고려)
-      const scrollPositionForTabs = scrollPosition + 120;
+      // 탭 선택을 위한 스크롤 위치 (줄어든 네비게이션 바 높이 고려)
+      const scrollPositionForTabs = scrollPosition + 80;
 
       // 각 섹션의 위치 확인
       const sections = tabs.map((tab) => {
@@ -103,17 +103,17 @@ const Navbar: React.FC = () => {
         !showHeader ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      {/* 상단 헤더 - 가게 이름과 액션 버튼 */}
-      <div className="px-4 py-3 flex items-center justify-between">
+      {/* 상단 헤더 - 가게 이름과 액션 버튼 (높이 줄임) */}
+      <div className="px-3 py-2 flex items-center justify-between">
         <div className="flex items-center">
-          <h1 className="font-semibold text-base truncate">
+          <h1 className="font-semibold text-sm truncate">
             HAEYOOM | Sydney Hair Salon
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Share"
             onClick={() => {
               // 현재 URL을 클립보드에 복사
@@ -128,7 +128,7 @@ const Navbar: React.FC = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5"
+              className="w-4 h-4"
             >
               <path
                 strokeLinecap="round"
@@ -138,7 +138,7 @@ const Navbar: React.FC = () => {
             </svg>
           </button>
           <button
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Login"
           >
             <svg
@@ -147,7 +147,7 @@ const Navbar: React.FC = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-5 h-5"
+              className="w-4 h-4"
             >
               <path
                 strokeLinecap="round"
@@ -159,13 +159,13 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* 탭 메뉴 */}
+      {/* 탭 메뉴 (높이 줄임) */}
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex px-4 space-x-6 min-w-max">
+        <div className="flex px-3 space-x-5 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab}
-              className={`py-3 font-medium text-sm relative ${
+              className={`py-2 font-medium text-xs relative ${
                 activeTab === tab ? "text-black" : "text-gray-500"
               }`}
               onClick={() => handleTabClick(tab)}

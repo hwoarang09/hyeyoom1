@@ -6,6 +6,8 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   contentClassName?: string; // 추가: 모달 컨텐츠에 적용할 추가 클래스
+  bgColor?: string; // 추가: 모달 배경색 커스터마이징
+  textColor?: string; // 추가: 모달 텍스트 색상 커스터마이징
 }
 
 // 모달 컴포넌트 - 새로운 구조로 재설계
@@ -15,6 +17,8 @@ const Modal: React.FC<ModalProps> = ({
   title,
   children,
   contentClassName = "",
+  bgColor = "bg-white", // 기본값은 흰색 배경
+  textColor = "text-gray-700", // 기본값은 회색 텍스트
 }) => {
   // 히스토리 상태 추가 여부를 추적하는 ref
   const historyStateAdded = useRef(false);
@@ -107,14 +111,18 @@ const Modal: React.FC<ModalProps> = ({
       <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose}></div>
 
       {/* 모달 전체 컨테이너 - 고정 레이아웃 */}
-      <div className="fixed inset-0 z-50 flex flex-col bg-white">
-        {/* 모달 헤더 - 고정 영역 */}
-        <div className="flex-none bg-white border-b">
-          <div className="flex justify-between items-center p-4">
+      <div className={`fixed inset-0 z-50 flex flex-col ${bgColor}`}>
+        {/* 모달 헤더 - 고정 영역 (높이만 줄임) */}
+        <div className={`flex-none ${bgColor} border-b`}>
+          <div className="flex justify-between items-center px-4 py-2">
             <div className="flex items-center">
               <button
                 onClick={onClose}
-                className="mr-3 text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded cursor-pointer transition-colors duration-200"
+                className={`mr-3 ${
+                  bgColor === "bg-black"
+                    ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                } p-1.5 rounded cursor-pointer transition-colors duration-200`}
                 aria-label="Back"
               >
                 <svg
@@ -132,16 +140,26 @@ const Modal: React.FC<ModalProps> = ({
                   />
                 </svg>
               </button>
-              <h3 className="text-lg font-semibold">{title}</h3>
+              <h3
+                className={`text-lg font-semibold ${
+                  bgColor === "bg-black" ? "text-white" : textColor
+                }`}
+              >
+                {title}
+              </h3>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 p-1.5 rounded cursor-pointer transition-colors duration-200"
+              className={`${
+                bgColor === "bg-black"
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              } p-1.5 rounded cursor-pointer transition-colors duration-200`}
               aria-label="Close"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

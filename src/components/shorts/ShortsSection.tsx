@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import Modal from "@/components/ui/Modal";
-import ShortsModal from "@/components/shorts/ShortsModal";
+import ShortsModalNew from "@/components/shorts/ShortsModalNew";
 import { useUIStore } from "@/store/uiStore";
 
 // 비디오 썸네일 캡처 함수 타입 (주석 처리)
@@ -76,6 +76,8 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
 
   // 비디오 모달 열기
   const openVideoModal = (index: number) => {
+    console.log(`Opening video modal with index: ${index}`);
+
     // 상태 업데이트를 일괄 처리하여 불필요한 렌더링 방지
     setSelectedVideoIndex(index);
     setCurrentShortsIndex(index);
@@ -85,20 +87,45 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
     setModalOpen(true);
   };
 
-  // 비디오 모달 닫기
+  // 비디오 모달 닫기 - 단순화된 버전
   const closeVideoModal = () => {
+    // 모달 상태 업데이트
     setIsVideoModalOpen(false);
     setModalOpen(false);
+
+    // 모든 비디오 요소를 찾아서 강제로 정지시킴 (소리가 계속 나오는 문제 해결)
+    try {
+      const allVideos = document.querySelectorAll("video");
+      allVideos.forEach((video) => {
+        video.pause();
+        video.volume = 0;
+        video.currentTime = 0;
+      });
+    } catch (error) {
+      console.error("Error stopping videos:", error);
+    }
   };
 
   // 비디오 변경 핸들러
   const handleChangeVideo = (index: number) => {
     // 현재 인덱스와 다를 때만 상태 업데이트 (불필요한 렌더링 방지)
     if (currentShortsIndex !== index || selectedVideoIndex !== index) {
+      console.log(
+        `handleChangeVideo: Updating indices from ${currentShortsIndex} to ${index}`
+      );
       setCurrentShortsIndex(index);
       setSelectedVideoIndex(index);
     }
   };
+
+  // 디버깅을 위한 useEffect
+  useEffect(() => {
+    if (isVideoModalOpen) {
+      console.log(
+        `ShortsSection: Video modal opened with currentShortsIndex: ${currentShortsIndex}`
+      );
+    }
+  }, [isVideoModalOpen, currentShortsIndex]);
 
   return (
     <div className="px-4 py-5 border-t border-gray-200">
@@ -261,7 +288,9 @@ const ShortsSection: React.FC<ShortsSectionProps> = ({ shorts }) => {
       </Modal>
 
       {/* 비디오 모달 */}
-      <ShortsModal
+      {/* 디버깅 로그는 useEffect 내에서 처리 */}
+
+      <ShortsModalNew
         isOpen={isVideoModalOpen}
         onClose={closeVideoModal}
         videoUrl={shortsVideos[selectedVideoIndex] || ""}
